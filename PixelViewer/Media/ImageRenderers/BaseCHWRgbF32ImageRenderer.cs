@@ -38,45 +38,38 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var packFunc = ImageProcessing.SelectBgra64Packing();
 
 			// render
-			var srcRow = new byte[rowStride];
-			fixed (byte* srcRowAddress = srcRow)
-			{
-				var srcRowPtr = srcRowAddress;
-				bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
-				{
-					var bitmapRowPtr = (byte*)bitmapBaseAddress;
-					var bitmapRowStride = bitmapBuffer.RowBytes;
-					for (var y = height; ; --y, bitmapRowPtr += bitmapRowStride)
-					{
-                        
-                        var isLastRow = (imageStream.Read(srcRow) < rowStride || y == 1);
-						var srcPixelPtr = srcRowPtr;
-						var bitmapPixelPtr = (ulong*)bitmapRowPtr;
-						for (var x = width; x > 0; --x, srcPixelPtr += pixelStride, ++bitmapPixelPtr)
-						{
-                            byte[] bytes = new byte[pixelStride];
-                            for (int i = 0; i < pixelStride; i++)
-                                bytes[i] = Marshal.ReadByte((nint) srcPixelPtr, i);
+            var numTotalPixels = width * height;
+            var numChannelBytes = numTotalPixels * sizeof(float);
+            var channelR = new byte[numChannelBytes];
+            var channelG = new byte[numChannelBytes];
+            var channelB = new byte[numChannelBytes];
+       
+            imageStream.Read(channelB);
+            imageStream.Read(channelG);
+            imageStream.Read(channelR);
 
-                            var component1 = BitConverter.ToSingle(bytes, 0);
-                            var component2 = BitConverter.ToSingle(bytes, 4);
-                            var component3 = BitConverter.ToSingle(bytes, 8);
-                            this.SelectRgb(component1, component2, component3, out var r, out var g, out var b);
-							*bitmapPixelPtr = packFunc(
-                                ImageProcessing.ClipToUInt16((double)b * 65535), 
-                                ImageProcessing.ClipToUInt16((double)g * 65535), 
-                                ImageProcessing.ClipToUInt16((double)r * 65535), 
-                                ImageProcessing.ClipToUInt16((double)1 * 65535));
-						}
-						if (isLastRow || cancellationToken.IsCancellationRequested)
-							break;
-						Array.Clear(srcRow, 0, rowStride);
-					}
-				});
-			}
+            bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
+            {
+                var bitmapRowPtr = (byte*)bitmapBaseAddress;
+                var bitmapBasePixelPtr = (ulong*)bitmapRowPtr;
 
-			// complete
-			return new ImageRenderingResult();
+                for (int i = 0; i < numTotalPixels; ++i)
+                {
+                    var bitmapPixelPtr = bitmapBasePixelPtr + i;
+                    var index = i * 4;
+                    var component1 = BitConverter.ToSingle(channelR, index);
+                    var component2 = BitConverter.ToSingle(channelG, index);
+                    var component3 = BitConverter.ToSingle(channelB, index);
+                    this.SelectRgb(component1, component2, component3, out var r, out var g, out var b);
+                    *bitmapPixelPtr = packFunc(
+                        ImageProcessing.ClipToUInt16((double) b * 65535),
+                        ImageProcessing.ClipToUInt16((double) g * 65535),
+                        ImageProcessing.ClipToUInt16((double) r * 65535),
+                        ImageProcessing.ClipToUInt16((double) 1 * 65535));
+                }
+            });
+            // complete
+            return new ImageRenderingResult();
 		}
 
 
