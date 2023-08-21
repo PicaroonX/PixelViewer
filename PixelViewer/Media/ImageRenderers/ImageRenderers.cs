@@ -71,7 +71,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				new BayerPattern16ImageRenderer(),
 
                 new HWCRgbF32ImageRenderer(),
+                new HWCBgrF32ImageRenderer(),
                 new CHWRgbF32ImageRenderer(),
+                new CHWBgrF32ImageRenderer(),
             });
 			it.Add(Platform.IsMacOS 
 				? new MacOSHeifImageRenderer() 

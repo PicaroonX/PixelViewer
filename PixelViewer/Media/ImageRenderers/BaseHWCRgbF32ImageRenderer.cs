@@ -116,4 +116,22 @@ namespace Carina.PixelViewer.Media.ImageRenderers
             b = component3;
         }
     }
+
+    class HWCBgrF32ImageRenderer : BaseHWCRgbF32ImageRenderer
+    {
+        /// <summary>
+        /// Initialize new <see cref="HWCRgbF32ImageRenderer"/> instance.
+        /// </summary>
+        public HWCBgrF32ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "HWC_BGR_F32", true, new ImagePlaneDescriptor(12), new string[] { "HWCBGRF32", "HWC_BGR_F32" }))
+        { }
+
+
+        /// <inheritdoc/>
+        protected override void SelectRgb(float component1, float component2, float component3, out float r, out float g, out float b)
+        {
+            r = component3;
+            g = component2;
+            b = component1;
+        }
+    }
 }
