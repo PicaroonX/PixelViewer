@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -72,9 +73,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
             return new ImageRenderingResult();
 		}
 
-
         /// <inheritdoc/>
-        public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+        public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default) =>
+            Task.FromResult(BitmapFormat.Bgra64);
 
 
         /// <summary>
