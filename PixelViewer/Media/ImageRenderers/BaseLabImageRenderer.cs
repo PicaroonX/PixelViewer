@@ -1,10 +1,11 @@
+using Aspose.Svg.Drawing;
 using CarinaStudio;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Aspose.Svg.Drawing;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -19,6 +20,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <param name="format">Supported format.</param>
 		protected BaseLabImageRenderer(ImageFormat format) : base(format)
 		{ }
+        public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default) =>
+            Task.FromResult(BitmapFormat.Bgra64);
 
         /// <inheritdoc/>
         protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
@@ -80,11 +83,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			// complete
 			return new ImageRenderingResult();
 		}
-
-
-        /// <inheritdoc/>
-        public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
-
 
         /// <summary>
 		/// Select R, G, B components.
